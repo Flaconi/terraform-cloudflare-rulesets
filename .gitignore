@@ -20,3 +20,6 @@ override.tf.json
 
 # Vars file
 /*.tfvars
+
+#IDEA
+.idea
