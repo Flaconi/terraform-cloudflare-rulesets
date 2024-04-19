@@ -49,9 +49,35 @@ Description: Cloudflare domain to apply rules for.
 
 Type: `string`
 
+### <a name="input_name"></a> [name](#input\_name)
+
+Description: Name of the ruleset.
+
+Type: `string`
+
+### <a name="input_kind"></a> [kind](#input\_kind)
+
+Description: Type of Ruleset to create.
+
+Type: `string`
+
+### <a name="input_phase"></a> [phase](#input\_phase)
+
+Description: Point in the request/response lifecycle where the ruleset will be created.
+
+Type: `string`
+
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_description"></a> [description](#input\_description)
+
+Description: Brief summary of the ruleset and its intended use.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_rules"></a> [rules](#input\_rules)
 
@@ -61,11 +87,11 @@ Type:
 
 ```hcl
 list(object({
-    description = string
-    enabled     = bool
-    action      = string
     expression  = string
-    products    = list(string)
+    action      = optional(string)
+    description = optional(string)
+    enabled     = optional(bool, true)
+    products    = optional(list(string), [])
   }))
 ```
 
