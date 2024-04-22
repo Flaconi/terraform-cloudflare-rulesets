@@ -1,8 +1,9 @@
-resource "cloudflare_ruleset" "http_request_firewall_custom" {
-  zone_id = lookup(data.cloudflare_zones.domain.zones[0], "id")
-  name    = "default"
-  kind    = "zone"
-  phase   = "http_request_firewall_custom"
+resource "cloudflare_ruleset" "this" {
+  zone_id     = lookup(data.cloudflare_zones.domain.zones[0], "id")
+  name        = var.name
+  kind        = var.kind
+  phase       = var.phase
+  description = var.description
 
   dynamic "rules" {
     for_each = local.rules
