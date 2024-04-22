@@ -2,9 +2,9 @@ module "rulesets" {
   source    = "./../../"
   api_token = var.api_token
   domain    = var.domain
-  name    = "default"
-  kind    = "zone"
-  phase   = "http_request_firewall_custom"
+  name      = "default"
+  kind      = "zone"
+  phase     = "http_request_firewall_custom"
   rules = [
     {
       description = "User-Agent: skip"
