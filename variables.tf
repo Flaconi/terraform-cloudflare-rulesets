@@ -18,11 +18,11 @@ variable "kind" {
   description = "Type of Ruleset to create."
   type        = string
 
-  # Ensure we specify only allowed kind values
+  # Ensure we specify only the supported kind values
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#kind
   validation {
-    condition     = can(contains(["custom", "managed", "root", "zone"], var.kind))
-    error_message = "Only the following kind types are allowed: custom, managed, root, zone."
+    condition     = can(contains(["zone"], var.kind))
+    error_message = "Only the following kind types are allowed: zone."
   }
 }
 
@@ -30,11 +30,12 @@ variable "phase" {
   description = "Point in the request/response lifecycle where the ruleset will be created."
   type        = string
 
-  # Ensure we specify only allowed kind values
+  # Ensure we specify only the supported kind values
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
+  # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = can(contains(["ddos_l4", "ddos_l7", "http_config_settings", "http_custom_errors", "http_log_custom_fields", "http_ratelimit", "http_request_cache_settings", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_late_transform", "http_request_origin", "http_request_redirect", "http_request_sanitize", "http_request_sbfm", "http_request_transform", "http_response_compression", "http_response_firewall_managed", "http_response_headers_transform", "magic_transit"], var.phase))
-    error_message = "Only the following phase types are allowed: ddos_l4, ddos_l7, http_config_settings, http_custom_errors, http_log_custom_fields, http_ratelimit, http_request_cache_settings, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_late_transform, http_request_origin, http_request_redirect, http_request_sanitize, http_request_sbfm, http_request_transform, http_response_compression, http_response_firewall_managed, http_response_headers_transform, magic_transit."
+    condition     = can(contains(["http_config_settings", "http_log_custom_fields", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_origin"], var.phase))
+    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_request_dynamic_redirect, http_request_firewall_custom, http_request_origin."
   }
 }
 
@@ -45,27 +46,79 @@ variable "description" {
 }
 
 variable "rules" {
-  description = "List of Cloudflare firewall rule objects."
+  description = "List of Cloudflare rule objects."
   type = list(object({
-    expression  = string
-    action      = optional(string)
+    expression = string
+    action     = string
+    action_parameters = optional(object({
+      # phase: http_request_origin, action: route
+      host_header = optional(string)
+
+      # phase: http_config_settings, action: set_config
+      polish = optional(string)
+
+      # phase: http_request_dynamic_redirect, action: redirect
+      from_value = optional(object({
+        preserve_query_string = optional(bool)
+        status_code           = number
+        target_url = object({
+          value = string
+        })
+      }), null)
+
+      # phase: http_request_firewall_custom, action: block, challenge, js_challenge, log, managed_challenge, skip
+      products = optional(list(string))
+      ruleset  = optional(string)
+
+      # phase: http_log_custom_fields, action: log_custom_field
+      cookie_fields   = optional(list(string))
+      request_fields  = optional(list(string))
+      response_fields = optional(list(string))
+    }), null)
     description = optional(string)
     enabled     = optional(bool, true)
-    products    = optional(list(string), [])
+    logging = optional(object({
+      enabled = bool
+    }), null)
   }))
   default = []
 
-  # Ensure we specify only allows action values
-  # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/firewall_rule#action
+  # Ensure we specify only the supported action values
+  # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#action
   validation {
-    condition     = can([for rule in var.rules : contains(["block", "challenge", "js_challenge", "log", "managed_challenge", "skip"], rule.action)])
-    error_message = "Only the following action elements are allowed: block, challenge, js_challenge, log, managed_challenge, skip."
+    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "route", "set_config", "skip"], rule.action)])
+    error_message = "Only the following action elements are allowed: block, challenge, js_challenge, log, managed_challenge, redirect, route, skip."
   }
 
-  # Ensure we specify only allowed products values
-  # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/firewall_rule#products
+  # Ensure we specify only allowed action_parameters.products values
+  # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#products
   validation {
-    condition     = can([for rule in var.rules : [for product in rule.products : contains(["bic", "hot", "ratelimit", "securityLevel", "uablock", "waf", "zonelockdown"], product)]])
+    condition     = alltrue([for rule in var.rules : try(alltrue([for product in rule.action_parameters.products : contains(["bic", "hot", "ratelimit", "securityLevel", "uablock", "waf", "zonelockdown"], product)]), true)])
     error_message = "Only the following product elements are allowed: bic, hot, ratelimit, securityLevel, uablock, waf, zonelockdown."
+  }
+
+  # Ensure we specify logging with skip action
+  # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#logging
+  validation {
+    condition     = alltrue([for rule in var.rules : rule.action != "skip" ? !can(rule.logging.enabled) : true])
+    error_message = "Logging element can be used with skip action."
+  }
+
+  # Ensure we specify only allowed action_parameters.from_value.status_code values
+  validation {
+    condition     = alltrue([for rule in var.rules : try(contains([301, 302, 303, 307, 308], rule.action_parameters.from_value.status_code), true)])
+    error_message = "Only the following status_code elements are allowed: 301, 302, 303, 307, 308."
+  }
+
+  # Ensure action_parameters.from_value.target_url.value is not empty
+  validation {
+    condition     = alltrue([for rule in var.rules : try(length(rule.action_parameters.from_value.target_url.value) > 0, true)])
+    error_message = "action_parameters.from_value.target_url.value cannot be empty"
+  }
+
+  # Ensure we specify only allowed action_parameters.polish
+  validation {
+    condition     = alltrue([for rule in var.rules : try(contains(["off", "lossless", "lossy"], rule.action_parameters.polish), true)])
+    error_message = "Only the following polish elements are allowed off, lossless, lossy"
   }
 }

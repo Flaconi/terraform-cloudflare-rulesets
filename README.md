@@ -81,17 +81,44 @@ Default: `null`
 
 ### <a name="input_rules"></a> [rules](#input\_rules)
 
-Description: List of Cloudflare firewall rule objects.
+Description: List of Cloudflare rule objects.
 
 Type:
 
 ```hcl
 list(object({
-    expression  = string
-    action      = optional(string)
+    expression = string
+    action     = string
+    action_parameters = optional(object({
+      # phase: http_request_origin, action: route
+      host_header = optional(string)
+
+      # phase: http_config_settings, action: set_config
+      polish = optional(string)
+
+      # phase: http_request_dynamic_redirect, action: redirect
+      from_value = optional(object({
+        preserve_query_string = optional(bool)
+        status_code           = number
+        target_url = object({
+          value = string
+        })
+      }), null)
+
+      # phase: http_request_firewall_custom, action: block, challenge, js_challenge, log, managed_challenge, skip
+      products = optional(list(string))
+      ruleset  = optional(string)
+
+      # phase: http_log_custom_fields, action: log_custom_field
+      cookie_fields   = optional(list(string))
+      request_fields  = optional(list(string))
+      response_fields = optional(list(string))
+    }), null)
     description = optional(string)
     enabled     = optional(bool, true)
-    products    = optional(list(string), [])
+    logging = optional(object({
+      enabled = bool
+    }), null)
   }))
 ```
 
