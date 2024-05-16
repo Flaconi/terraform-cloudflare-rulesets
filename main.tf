@@ -32,6 +32,7 @@ resource "cloudflare_ruleset" "this" {
           }
 
           # http_request_firewall_custom
+          phases   = action_parameters.value.phases
           ruleset  = action_parameters.value.ruleset
           products = action_parameters.value.products
 

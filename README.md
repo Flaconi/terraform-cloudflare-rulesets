@@ -106,6 +106,7 @@ list(object({
       }), null)
 
       # phase: http_request_firewall_custom, action: block, challenge, js_challenge, log, managed_challenge, skip
+      phases   = optional(list(string))
       products = optional(list(string))
       ruleset  = optional(string)
 
