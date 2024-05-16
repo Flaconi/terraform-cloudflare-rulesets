@@ -18,7 +18,7 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 4.20 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | = 4.32.0 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -28,7 +28,7 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 4.20 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | = 4.32.0 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
