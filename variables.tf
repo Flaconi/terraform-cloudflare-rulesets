@@ -34,8 +34,8 @@ variable "phase" {
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
   # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = can(contains(["http_config_settings", "http_log_custom_fields", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_origin"], var.phase))
-    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_request_dynamic_redirect, http_request_firewall_custom, http_request_origin."
+    condition     = can(contains(["http_config_settings", "http_log_custom_fields", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin"], var.phase))
+    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin."
   }
 }
 
@@ -75,6 +75,25 @@ variable "rules" {
       cookie_fields   = optional(list(string))
       request_fields  = optional(list(string))
       response_fields = optional(list(string))
+
+      # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
+      id      = optional(string)
+      version = optional(string)
+      overrides = optional(object({
+        action = optional(string)
+        categories = optional(list(object({
+          action   = optional(string)
+          category = string
+          enabled  = bool
+        })), [])
+        enabled = optional(bool)
+        rules = optional(list(object({
+          id              = string
+          action          = string
+          enabled         = bool
+          score_threshold = optional(number)
+        })), [])
+      }), null)
     }), null)
     description = optional(string)
     enabled     = optional(bool, true)
@@ -87,8 +106,8 @@ variable "rules" {
   # Ensure we specify only the supported action values
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#action
   validation {
-    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "route", "set_config", "skip"], rule.action)])
-    error_message = "Only the following action elements are allowed: block, challenge, js_challenge, log, managed_challenge, redirect, route, skip."
+    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "execute", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "route", "set_config", "skip"], rule.action)])
+    error_message = "Only the following action elements are allowed: block, challenge, execute, js_challenge, log, managed_challenge, redirect, route, skip."
   }
 
   # Ensure we specify only allowed action_parameters.products values

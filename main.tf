@@ -40,6 +40,35 @@ resource "cloudflare_ruleset" "this" {
           cookie_fields   = action_parameters.value.cookie_fields
           request_fields  = action_parameters.value.request_fields
           response_fields = action_parameters.value.response_fields
+
+          # http_request_firewall_managed
+          id      = action_parameters.value.id
+          version = action_parameters.value.version
+          dynamic "overrides" {
+            for_each = rules.value.action_parameters.overrides[*]
+            content {
+              action = overrides.value.action
+              dynamic "categories" {
+                for_each = overrides.value.categories
+                content {
+                  action   = categories.value.action
+                  category = categories.value.category
+                  enabled  = categories.value.enabled
+                }
+              }
+              enabled = overrides.value.enabled
+              dynamic "rules" {
+                for_each = overrides.value.rules
+                iterator = override_rule
+                content {
+                  id              = override_rule.value.id
+                  action          = override_rule.value.action
+                  enabled         = override_rule.value.enabled
+                  score_threshold = override_rule.value.score_threshold
+                }
+              }
+            }
+          }
         }
       }
       description = rules.value.description

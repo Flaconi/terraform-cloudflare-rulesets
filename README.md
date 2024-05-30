@@ -114,6 +114,25 @@ list(object({
       cookie_fields   = optional(list(string))
       request_fields  = optional(list(string))
       response_fields = optional(list(string))
+
+      # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
+      id      = optional(string)
+      version = optional(string)
+      overrides = optional(object({
+        action = optional(string)
+        categories = optional(list(object({
+          action   = optional(string)
+          category = string
+          enabled  = bool
+        })), [])
+        enabled = optional(bool)
+        rules = optional(list(object({
+          id              = string
+          action          = string
+          enabled         = bool
+          score_threshold = optional(number)
+        })), [])
+      }), null)
     }), null)
     description = optional(string)
     enabled     = optional(bool, true)
