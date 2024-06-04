@@ -53,6 +53,10 @@ variable "rules" {
     action_parameters = optional(object({
       # phase: http_request_origin, action: route
       host_header = optional(string)
+      origin = optional(object({
+        host = optional(string)
+        port = optional(number)
+      }), null)
 
       # phase: http_config_settings, action: set_config
       polish = optional(string)
