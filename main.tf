@@ -18,8 +18,8 @@ resource "cloudflare_ruleset" "this" {
           dynamic "origin" {
             for_each = rules.value.action_parameters.origin[*]
             content {
-              host = from_value.value.host
-              port = from_value.value.port
+              host = origin.value.host
+              port = origin.value.port
             }
           }
 
