@@ -15,6 +15,13 @@ resource "cloudflare_ruleset" "this" {
         content {
           # http_request_origin
           host_header = action_parameters.value.host_header
+          dynamic "origin" {
+            for_each = rules.value.action_parameters.origin[*]
+            content {
+              host = from_value.value.host
+              port = from_value.value.port
+            }
+          }
 
           # http_config_settings
           polish = action_parameters.value.polish
