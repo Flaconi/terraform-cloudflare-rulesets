@@ -137,6 +137,12 @@ list(object({
           score_threshold = optional(number)
         })), [])
       }), null)
+
+      # phase: http_request_transform
+      uri = optional(object({
+        path  = optional(string)
+        query = optional(string)
+      }))
     }), null)
     description = optional(string)
     enabled     = optional(bool, true)

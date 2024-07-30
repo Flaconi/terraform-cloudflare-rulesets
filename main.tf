@@ -76,6 +76,26 @@ resource "cloudflare_ruleset" "this" {
               }
             }
           }
+
+          # http_request_transform
+          dynamic "uri" {
+            for_each = rules.value.action_parameters.uri[*]
+            content {
+              dynamic "path" {
+                for_each = uri.value.path[*]
+                content {
+                  value = path.value
+                }
+              }
+
+              dynamic "query" {
+                for_each = uri.value.query[*]
+                content {
+                  value = query.value
+                }
+              }
+            }
+          }
         }
       }
       description = rules.value.description
