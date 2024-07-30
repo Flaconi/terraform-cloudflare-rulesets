@@ -98,6 +98,12 @@ variable "rules" {
           score_threshold = optional(number)
         })), [])
       }), null)
+
+      # phase: http_request_transform
+      uri = optional(object({
+        path  = optional(string)
+        query = optional(string)
+      }))
     }), null)
     description = optional(string)
     enabled     = optional(bool, true)
@@ -110,8 +116,8 @@ variable "rules" {
   # Ensure we specify only the supported action values
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#action
   validation {
-    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "execute", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "route", "set_config", "skip"], rule.action)])
-    error_message = "Only the following action elements are allowed: block, challenge, execute, js_challenge, log, managed_challenge, redirect, route, skip."
+    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "execute", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "rewrite", "route", "set_config", "skip"], rule.action)])
+    error_message = "Only the following action elements are allowed: block, challenge, execute, js_challenge, log, log_custom_field, managed_challenge, redirect, rewrite, route, skip."
   }
 
   # Ensure we specify only allowed action_parameters.products values
@@ -144,5 +150,11 @@ variable "rules" {
   validation {
     condition     = alltrue([for rule in var.rules : try(contains(["off", "lossless", "lossy"], rule.action_parameters.polish), true)])
     error_message = "Only the following polish elements are allowed off, lossless, lossy"
+  }
+
+  # Ensure that either query or path are set for rewrite rules
+  validation {
+    condition     = alltrue([for rule in var.rules : rule.action == "rewrite" ? (can(rule.action_parameters.uri.path) || can(rule.action_parameters.uri.query)) : true])
+    error_message = "action_parameters.uri needs to have either path or query value for rewrite"
   }
 }
