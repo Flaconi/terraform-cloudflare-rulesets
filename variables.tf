@@ -34,8 +34,8 @@ variable "phase" {
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
   # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = can(contains(["http_config_settings", "http_log_custom_fields", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin"], var.phase))
-    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin."
+    condition     = contains(["http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform"], var.phase)
+    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform."
   }
 }
 
@@ -51,15 +51,13 @@ variable "rules" {
     expression = string
     action     = string
     action_parameters = optional(object({
-      # phase: http_request_origin, action: route
-      host_header = optional(string)
-      origin = optional(object({
-        host = optional(string)
-        port = optional(number)
-      }), null)
-
       # phase: http_config_settings, action: set_config
       polish = optional(string)
+
+      # phase: http_log_custom_fields, action: log_custom_field
+      cookie_fields   = optional(list(string))
+      request_fields  = optional(list(string))
+      response_fields = optional(list(string))
 
       # phase: http_request_dynamic_redirect, action: redirect
       from_value = optional(object({
@@ -74,11 +72,6 @@ variable "rules" {
       phases   = optional(list(string))
       products = optional(list(string))
       ruleset  = optional(string)
-
-      # phase: http_log_custom_fields, action: log_custom_field
-      cookie_fields   = optional(list(string))
-      request_fields  = optional(list(string))
-      response_fields = optional(list(string))
 
       # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
       id      = optional(string)
@@ -99,11 +92,29 @@ variable "rules" {
         })), [])
       }), null)
 
+      # phase: http_request_origin, action: route
+      host_header = optional(string)
+      origin = optional(object({
+        host = optional(string)
+        port = optional(number)
+      }), null)
+
       # phase: http_request_transform
       uri = optional(object({
         path  = optional(string)
         query = optional(string)
       }))
+    }), null)
+    # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
+    ratelimit = optional(object({
+      characteristics            = optional(list(string))
+      counting_expression        = optional(string)
+      mitigation_timeout         = optional(number)
+      period                     = optional(number)
+      requests_per_period        = optional(number)
+      requests_to_origin         = optional(bool)
+      score_per_period           = optional(number)
+      score_response_header_name = optional(string)
     }), null)
     description = optional(string)
     enabled     = optional(bool, true)

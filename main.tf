@@ -13,18 +13,13 @@ resource "cloudflare_ruleset" "this" {
       dynamic "action_parameters" {
         for_each = rules.value.action_parameters[*]
         content {
-          # http_request_origin
-          host_header = action_parameters.value.host_header
-          dynamic "origin" {
-            for_each = rules.value.action_parameters.origin[*]
-            content {
-              host = origin.value.host
-              port = origin.value.port
-            }
-          }
-
           # http_config_settings
           polish = action_parameters.value.polish
+
+          # http_log_custom_fields
+          cookie_fields   = action_parameters.value.cookie_fields
+          request_fields  = action_parameters.value.request_fields
+          response_fields = action_parameters.value.response_fields
 
           # http_request_dynamic_redirect
           dynamic "from_value" {
@@ -42,11 +37,6 @@ resource "cloudflare_ruleset" "this" {
           phases   = action_parameters.value.phases
           ruleset  = action_parameters.value.ruleset
           products = action_parameters.value.products
-
-          # http_log_custom_fields
-          cookie_fields   = action_parameters.value.cookie_fields
-          request_fields  = action_parameters.value.request_fields
-          response_fields = action_parameters.value.response_fields
 
           # http_request_firewall_managed
           id      = action_parameters.value.id
@@ -77,6 +67,16 @@ resource "cloudflare_ruleset" "this" {
             }
           }
 
+          # http_request_origin
+          host_header = action_parameters.value.host_header
+          dynamic "origin" {
+            for_each = rules.value.action_parameters.origin[*]
+            content {
+              host = origin.value.host
+              port = origin.value.port
+            }
+          }
+
           # http_request_transform
           dynamic "uri" {
             for_each = rules.value.action_parameters.uri[*]
@@ -98,9 +98,26 @@ resource "cloudflare_ruleset" "this" {
           }
         }
       }
+
+      # http_ratelimit
+      dynamic "ratelimit" {
+        for_each = rules.value.ratelimit[*]
+        content {
+          characteristics            = ratelimit.value.characteristics
+          counting_expression        = ratelimit.value.counting_expression
+          mitigation_timeout         = ratelimit.value.mitigation_timeout
+          period                     = ratelimit.value.period
+          requests_per_period        = ratelimit.value.requests_per_period
+          requests_to_origin         = ratelimit.value.requests_to_origin
+          score_per_period           = ratelimit.value.score_per_period
+          score_response_header_name = ratelimit.value.score_response_header_name
+        }
+      }
+
       description = rules.value.description
       enabled     = rules.value.enabled
       expression  = rules.value.expression
+
       dynamic "logging" {
         for_each = rules.value.logging[*]
         content {
