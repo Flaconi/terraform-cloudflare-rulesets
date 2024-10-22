@@ -103,7 +103,8 @@ list(object({
         preserve_query_string = optional(bool)
         status_code           = number
         target_url = object({
-          value = string
+          value      = optional(string)
+          expression = optional(string)
         })
       }), null)
 

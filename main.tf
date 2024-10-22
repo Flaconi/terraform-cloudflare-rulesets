@@ -27,8 +27,18 @@ resource "cloudflare_ruleset" "this" {
             content {
               preserve_query_string = from_value.value.preserve_query_string
               status_code           = from_value.value.status_code
-              target_url {
-                value = from_value.value.target_url.value
+              dynamic "target_url" {
+                for_each = from_value.value.target_url.value != null ? [1] : []
+                content {
+                  value = from_value.value.target_url.value
+                }
+              }
+
+              dynamic "target_url" {
+                for_each = from_value.value.target_url.expression != null ? [1] : []
+                content {
+                  expression = from_value.value.target_url.expression
+                }
               }
             }
           }

@@ -64,7 +64,8 @@ variable "rules" {
         preserve_query_string = optional(bool)
         status_code           = number
         target_url = object({
-          value = string
+          value      = optional(string)
+          expression = optional(string)
         })
       }), null)
 
@@ -157,6 +158,12 @@ variable "rules" {
     error_message = "action_parameters.from_value.target_url.value cannot be empty"
   }
 
+  # Ensure action_parameters.from_value.target_url.expression is not empty
+  validation {
+    condition     = alltrue([for rule in var.rules : try(length(rule.action_parameters.from_value.target_url.expression) > 0, true)])
+    error_message = "action_parameters.from_value.target_url.expression cannot be empty"
+  }
+
   # Ensure we specify only allowed action_parameters.polish
   validation {
     condition     = alltrue([for rule in var.rules : try(contains(["off", "lossless", "lossy"], rule.action_parameters.polish), true)])
@@ -167,5 +174,11 @@ variable "rules" {
   validation {
     condition     = alltrue([for rule in var.rules : rule.action == "rewrite" ? (can(rule.action_parameters.uri.path) || can(rule.action_parameters.uri.query)) : true])
     error_message = "action_parameters.uri needs to have either path or query value for rewrite"
+  }
+
+  # Ensure that either expression or value are set for redirect rules as target_url
+  validation {
+    condition     = alltrue([for rule in var.rules : rule.action == "redirect" ? (rule.action_parameters.from_value.target_url.value != null || rule.action_parameters.from_value.target_url.expression != null) : true])
+    error_message = "action_parameters.from_value.target_url needs to have either expression or value for redirect"
   }
 }
