@@ -18,7 +18,7 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 4.20 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 4.48 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -28,7 +28,7 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 4.20 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 4.48 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -114,8 +114,7 @@ list(object({
       ruleset  = optional(string)
 
       # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
-      id      = optional(string)
-      version = optional(string)
+      id = optional(string)
       overrides = optional(object({
         action = optional(string)
         categories = optional(list(object({

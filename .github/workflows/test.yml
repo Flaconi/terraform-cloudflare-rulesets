@@ -47,4 +47,4 @@ jobs:
           }
           retry make test
         env:
-          RETRIES: 20
+          RETRIES: 1
