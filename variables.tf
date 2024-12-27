@@ -75,8 +75,7 @@ variable "rules" {
       ruleset  = optional(string)
 
       # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
-      id      = optional(string)
-      version = optional(string)
+      id = optional(string)
       overrides = optional(object({
         action = optional(string)
         categories = optional(list(object({

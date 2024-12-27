@@ -59,4 +59,4 @@ jobs:
           git diff --quiet || { echo "Build Changes"; git diff; git status; false; }
         env:
           TARGET: ${{ matrix.target }}
-          RETRIES: 20
+          RETRIES: 1

@@ -49,8 +49,7 @@ resource "cloudflare_ruleset" "this" {
           products = action_parameters.value.products
 
           # http_request_firewall_managed
-          id      = action_parameters.value.id
-          version = action_parameters.value.version
+          id = action_parameters.value.id
           dynamic "overrides" {
             for_each = rules.value.action_parameters.overrides[*]
             content {
