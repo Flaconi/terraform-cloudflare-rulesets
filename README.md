@@ -18,7 +18,7 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 4.48 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 4.51 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -27,8 +27,8 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 4.48 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 4.51 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -160,6 +160,7 @@ list(object({
     logging = optional(object({
       enabled = bool
     }), null)
+    ref = optional(string)
   }))
 ```
 

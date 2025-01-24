@@ -121,6 +121,7 @@ variable "rules" {
     logging = optional(object({
       enabled = bool
     }), null)
+    ref = optional(string)
   }))
   default = []
 

@@ -108,6 +108,17 @@ resource "cloudflare_ruleset" "this" {
         }
       }
 
+      description = rules.value.description
+      enabled     = rules.value.enabled
+      expression  = rules.value.expression
+
+      dynamic "logging" {
+        for_each = rules.value.logging[*]
+        content {
+          enabled = logging.value.enabled
+        }
+      }
+
       # http_ratelimit
       dynamic "ratelimit" {
         for_each = rules.value.ratelimit[*]
@@ -123,16 +134,7 @@ resource "cloudflare_ruleset" "this" {
         }
       }
 
-      description = rules.value.description
-      enabled     = rules.value.enabled
-      expression  = rules.value.expression
-
-      dynamic "logging" {
-        for_each = rules.value.logging[*]
-        content {
-          enabled = logging.value.enabled
-        }
-      }
+      ref = coalesce(rules.value.ref, md5("${rules.value.description}-${rules.value.expression}"))
     }
   }
 }
