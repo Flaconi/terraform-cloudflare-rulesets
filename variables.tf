@@ -34,8 +34,8 @@ variable "phase" {
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
   # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = contains(["http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform"], var.phase)
-    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform."
+    condition     = contains(["http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_cache_settings"], var.phase)
+    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_cache_settings."
   }
 }
 
@@ -104,6 +104,23 @@ variable "rules" {
         path  = optional(string)
         query = optional(string)
       }))
+
+      # phase: http_request_cache_settings
+      cache = optional(bool)
+      edge_ttl = optional(object({
+        default = number
+        mode    = string
+        status_code_ttl = optional(list(object({
+          value       = number
+          status_code = optional(number)
+          status_code_range = optional(object({
+            from = optional(number)
+            to   = optional(number)
+          }))
+        })), [])
+      }), null)
+
+
     }), null)
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
     ratelimit = optional(object({
@@ -128,8 +145,8 @@ variable "rules" {
   # Ensure we specify only the supported action values
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#action
   validation {
-    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "execute", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "rewrite", "route", "set_config", "skip"], rule.action)])
-    error_message = "Only the following action elements are allowed: block, challenge, execute, js_challenge, log, log_custom_field, managed_challenge, redirect, rewrite, route, skip."
+    condition     = alltrue([for rule in var.rules : contains(["block", "challenge", "execute", "js_challenge", "log", "log_custom_field", "managed_challenge", "redirect", "rewrite", "route", "set_cache_settings", "set_config", "skip"], rule.action)])
+    error_message = "Only the following action elements are allowed: block, challenge, execute, js_challenge, log, log_custom_field, managed_challenge, redirect, rewrite, route, set_cache_settings, set_config, skip."
   }
 
   # Ensure we specify only allowed action_parameters.products values
@@ -180,5 +197,11 @@ variable "rules" {
   validation {
     condition     = alltrue([for rule in var.rules : rule.action == "redirect" ? (rule.action_parameters.from_value.target_url.value != null || rule.action_parameters.from_value.target_url.expression != null) : true])
     error_message = "action_parameters.from_value.target_url needs to have either expression or value for redirect"
+  }
+
+  # Ensure we specify only allowed action_parameters.edge_ttl.mode
+  validation {
+    condition     = alltrue([for rule in var.rules : try(contains(["respect_origin", "bypass_by_default", "override_origin"], rule.action_parameters.edge_ttl.mode), true)])
+    error_message = "Only the following edge_ttl.mode elements are allowed respect_origin, bypass_by_default, override_origin"
   }
 }

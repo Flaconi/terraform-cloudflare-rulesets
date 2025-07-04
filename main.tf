@@ -105,6 +105,30 @@ resource "cloudflare_ruleset" "this" {
               }
             }
           }
+
+          # http_request_cache_settings
+          cache = action_parameters.value.cache
+          dynamic "edge_ttl" {
+            for_each = rules.value.action_parameters.edge_ttl[*]
+            content {
+              default = edge_ttl.value.default
+              mode    = edge_ttl.value.mode
+              dynamic "status_code_ttl" {
+                for_each = edge_ttl.value.status_code_ttl[*]
+                content {
+                  value       = status_code_ttl.value.value
+                  status_code = status_code_ttl.value.status_code
+                  dynamic "status_code_range" {
+                    for_each = status_code_ttl.value.status_code_range[*]
+                    content {
+                      from = status_code_range.value.from
+                      to   = status_code_range.value.to
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
 

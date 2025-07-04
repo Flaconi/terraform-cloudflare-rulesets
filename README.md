@@ -143,6 +143,22 @@ list(object({
         path  = optional(string)
         query = optional(string)
       }))
+
+      # phase: http_request_cache_settings
+      cache = optional(bool)
+      edge_ttl = optional(object({
+        default = number
+        mode    = string
+        status_code_ttl = optional(list(object({
+          value       = number
+          status_code = optional(number)
+          status_code_range = optional(object({
+            from = optional(number)
+            to   = optional(number)
+          }))
+        })), [])
+      }), null)
+
     }), null)
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
     ratelimit = optional(object({
