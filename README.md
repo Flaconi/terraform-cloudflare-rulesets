@@ -18,7 +18,8 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | 4.52.0 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | 5.6.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -28,7 +29,8 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | 4.52.0 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | 5.6.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | 3.7.2 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -87,16 +89,40 @@ Type:
 
 ```hcl
 list(object({
-    expression = string
-    action     = string
+    description = optional(string)
+    enabled     = optional(bool, true)
+    ref         = optional(string)
+    expression  = string
+    action      = string
     action_parameters = optional(object({
       # phase: http_config_settings, action: set_config
       polish = optional(string)
 
       # phase: http_log_custom_fields, action: log_custom_field
-      cookie_fields   = optional(list(string))
-      request_fields  = optional(list(string))
-      response_fields = optional(list(string))
+      cookie_fields = optional(list(object({
+        name = string
+      })), null)
+      request_fields = optional(list(object({
+        name = string
+      })), null)
+      response_fields = optional(list(object({
+        name = string
+      })), null)
+
+      # phase: http_request_cache_settings
+      cache = optional(bool)
+      edge_ttl = optional(object({
+        default = number
+        mode    = string
+        status_code_ttl = optional(list(object({
+          value       = number
+          status_code = optional(number)
+          status_code_range = optional(object({
+            from = optional(number)
+            to   = optional(number)
+          }), null)
+        })), null)
+      }), null)
 
       # phase: http_request_dynamic_redirect, action: redirect
       from_value = optional(object({
@@ -121,14 +147,14 @@ list(object({
           action   = optional(string)
           category = string
           enabled  = bool
-        })), [])
+        })), null)
         enabled = optional(bool)
         rules = optional(list(object({
           id              = string
           action          = string
           enabled         = bool
           score_threshold = optional(number)
-        })), [])
+        })), null)
       }), null)
 
       # phase: http_request_origin, action: route
@@ -140,26 +166,17 @@ list(object({
 
       # phase: http_request_transform
       uri = optional(object({
-        path  = optional(string)
-        query = optional(string)
-      }))
-
-      # phase: http_request_cache_settings
-      cache = optional(bool)
-      edge_ttl = optional(object({
-        default = number
-        mode    = string
-        status_code_ttl = optional(list(object({
-          value       = number
-          status_code = optional(number)
-          status_code_range = optional(object({
-            from = optional(number)
-            to   = optional(number)
-          }))
-        })), [])
+        path = optional(object({
+          expression = optional(string)
+          value      = string
+        }), null)
+        query = optional(object({
+          expression = optional(string)
+          value      = string
+        }), null)
       }), null)
-
     }), null)
+
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
     ratelimit = optional(object({
       characteristics            = optional(list(string))
@@ -171,12 +188,10 @@ list(object({
       score_per_period           = optional(number)
       score_response_header_name = optional(string)
     }), null)
-    description = optional(string)
-    enabled     = optional(bool, true)
+
     logging = optional(object({
       enabled = bool
     }), null)
-    ref = optional(string)
   }))
 ```
 

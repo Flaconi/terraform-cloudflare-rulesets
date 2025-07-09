@@ -48,16 +48,40 @@ variable "description" {
 variable "rules" {
   description = "List of Cloudflare rule objects."
   type = list(object({
-    expression = string
-    action     = string
+    description = optional(string)
+    enabled     = optional(bool, true)
+    ref         = optional(string)
+    expression  = string
+    action      = string
     action_parameters = optional(object({
       # phase: http_config_settings, action: set_config
       polish = optional(string)
 
       # phase: http_log_custom_fields, action: log_custom_field
-      cookie_fields   = optional(list(string))
-      request_fields  = optional(list(string))
-      response_fields = optional(list(string))
+      cookie_fields = optional(list(object({
+        name = string
+      })), null)
+      request_fields = optional(list(object({
+        name = string
+      })), null)
+      response_fields = optional(list(object({
+        name = string
+      })), null)
+
+      # phase: http_request_cache_settings
+      cache = optional(bool)
+      edge_ttl = optional(object({
+        default = number
+        mode    = string
+        status_code_ttl = optional(list(object({
+          value       = number
+          status_code = optional(number)
+          status_code_range = optional(object({
+            from = optional(number)
+            to   = optional(number)
+          }), null)
+        })), null)
+      }), null)
 
       # phase: http_request_dynamic_redirect, action: redirect
       from_value = optional(object({
@@ -82,14 +106,14 @@ variable "rules" {
           action   = optional(string)
           category = string
           enabled  = bool
-        })), [])
+        })), null)
         enabled = optional(bool)
         rules = optional(list(object({
           id              = string
           action          = string
           enabled         = bool
           score_threshold = optional(number)
-        })), [])
+        })), null)
       }), null)
 
       # phase: http_request_origin, action: route
@@ -101,27 +125,17 @@ variable "rules" {
 
       # phase: http_request_transform
       uri = optional(object({
-        path  = optional(string)
-        query = optional(string)
-      }))
-
-      # phase: http_request_cache_settings
-      cache = optional(bool)
-      edge_ttl = optional(object({
-        default = number
-        mode    = string
-        status_code_ttl = optional(list(object({
-          value       = number
-          status_code = optional(number)
-          status_code_range = optional(object({
-            from = optional(number)
-            to   = optional(number)
-          }))
-        })), [])
+        path = optional(object({
+          expression = optional(string)
+          value      = string
+        }), null)
+        query = optional(object({
+          expression = optional(string)
+          value      = string
+        }), null)
       }), null)
-
-
     }), null)
+
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
     ratelimit = optional(object({
       characteristics            = optional(list(string))
@@ -133,12 +147,10 @@ variable "rules" {
       score_per_period           = optional(number)
       score_response_header_name = optional(string)
     }), null)
-    description = optional(string)
-    enabled     = optional(bool, true)
+
     logging = optional(object({
       enabled = bool
     }), null)
-    ref = optional(string)
   }))
   default = []
 
@@ -203,5 +215,11 @@ variable "rules" {
   validation {
     condition     = alltrue([for rule in var.rules : try(contains(["respect_origin", "bypass_by_default", "override_origin"], rule.action_parameters.edge_ttl.mode), true)])
     error_message = "Only the following edge_ttl.mode elements are allowed respect_origin, bypass_by_default, override_origin"
+  }
+
+  # Ensure we specify unique rule description. The description is uses as reference if it is not defined explicitly.
+  validation {
+    condition     = length(distinct([for r in var.rules : coalesce(r.ref, r.description)])) == length(var.rules)
+    error_message = "Rule description (or ref) should be unique to identify the rule. It is used as reference in the provider to manage the updates."
   }
 }
