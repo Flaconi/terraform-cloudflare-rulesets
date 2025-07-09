@@ -1,164 +1,120 @@
 resource "cloudflare_ruleset" "this" {
-  zone_id     = lookup(data.cloudflare_zones.domain.zones[0], "id")
+  zone_id     = lookup(data.cloudflare_zones.domain.result[0], "id")
   name        = var.name
   kind        = var.kind
   phase       = var.phase
   description = var.description
 
-  dynamic "rules" {
-    for_each = var.rules
+  rules = [
+    for rule in var.rules : {
+      action = rule.action
+      action_parameters = rule.action_parameters == null ? null : {
+        # http_config_settings
+        polish = rule.action_parameters.polish
 
-    content {
-      action = rules.value.action
-      dynamic "action_parameters" {
-        for_each = rules.value.action_parameters[*]
-        content {
-          # http_config_settings
-          polish = action_parameters.value.polish
+        # http_log_custom_fields
+        cookie_fields   = rule.action_parameters.cookie_fields
+        request_fields  = rule.action_parameters.request_fields
+        response_fields = rule.action_parameters.response_fields
 
-          # http_log_custom_fields
-          cookie_fields   = action_parameters.value.cookie_fields
-          request_fields  = action_parameters.value.request_fields
-          response_fields = action_parameters.value.response_fields
-
-          # http_request_dynamic_redirect
-          dynamic "from_value" {
-            for_each = rules.value.action_parameters.from_value[*]
-            content {
-              preserve_query_string = from_value.value.preserve_query_string
-              status_code           = from_value.value.status_code
-              dynamic "target_url" {
-                for_each = from_value.value.target_url.value != null ? [1] : []
-                content {
-                  value = from_value.value.target_url.value
-                }
-              }
-
-              dynamic "target_url" {
-                for_each = from_value.value.target_url.expression != null ? [1] : []
-                content {
-                  expression = from_value.value.target_url.expression
-                }
+        # http_request_cache_settings
+        cache = rule.action_parameters.cache
+        edge_ttl = rule.action_parameters.edge_ttl == null ? null : {
+          default = rule.action_parameters.edge_ttl.default
+          mode    = rule.action_parameters.edge_ttl.mode
+          status_code_ttl = rule.action_parameters.edge_ttl.status_code_ttl == null ? null : [
+            for sct in rule.action_parameters.edge_ttl.status_code_ttl : {
+              value       = sct.value
+              status_code = sct.status_code
+              status_code_range = sct.status_code_ttl == null ? null : {
+                from = sct.status_code_range.from
+                to   = sct.status_code_range.to
               }
             }
+          ]
+        }
+
+        # http_request_dynamic_redirect
+        from_value = rule.action_parameters.from_value == null ? null : {
+          preserve_query_string = rule.action_parameters.from_value.preserve_query_string
+          status_code           = rule.action_parameters.from_value.status_code
+          target_url = {
+            value      = rule.action_parameters.from_value.target_url.value
+            expression = rule.action_parameters.from_value.target_url.expression
           }
+        }
 
-          # http_request_firewall_custom
-          phases   = action_parameters.value.phases
-          ruleset  = action_parameters.value.ruleset
-          products = action_parameters.value.products
+        # http_request_firewall_custom
+        phases   = rule.action_parameters.phases
+        ruleset  = rule.action_parameters.ruleset
+        products = rule.action_parameters.products
 
-          # http_request_firewall_managed
-          id = action_parameters.value.id
-          dynamic "overrides" {
-            for_each = rules.value.action_parameters.overrides[*]
-            content {
-              action = overrides.value.action
-              dynamic "categories" {
-                for_each = overrides.value.categories
-                content {
-                  action   = categories.value.action
-                  category = categories.value.category
-                  enabled  = categories.value.enabled
-                }
-              }
-              enabled = overrides.value.enabled
-              dynamic "rules" {
-                for_each = overrides.value.rules
-                iterator = override_rule
-                content {
-                  id              = override_rule.value.id
-                  action          = override_rule.value.action
-                  enabled         = override_rule.value.enabled
-                  score_threshold = override_rule.value.score_threshold
-                }
-              }
+        # http_request_firewall_managed
+        id = rule.action_parameters.id
+        overrides = rule.action_parameters.overrides == null ? null : {
+          action = rule.action_parameters.overrides.action
+          categories = rule.action_parameters.overrides.categories == null ? null : [
+            for cat in rule.action_parameters.overrides.categories : {
+              action   = cat.action
+              category = cat.category
+              enabled  = cat.enabled
             }
+          ]
+          enabled = rule.action_parameters.overrides.enabled
+          rules = rule.action_parameters.overrides.rules == null ? null : [
+            for o_rule in rule.action_parameters.overrides.rules : {
+              id              = o_rule.id
+              action          = o_rule.action
+              enabled         = o_rule.enabled
+              score_threshold = o_rule.score_threshold
+            }
+          ]
+        }
+
+        # http_request_origin
+        host_header = rule.action_parameters.host_header
+        origin = rule.action_parameters.origin == null ? null : {
+          host = rule.action_parameters.origin.host
+          port = rule.action_parameters.origin.port
+        }
+
+        # http_request_transform
+        uri = rule.action_parameters.uri == null ? null : {
+          path = rule.action_parameters.uri.path == null ? null : {
+            expression = rule.action_parameters.uri.path.expression
+            value      = rule.action_parameters.uri.path.value
           }
-
-          # http_request_origin
-          host_header = action_parameters.value.host_header
-          dynamic "origin" {
-            for_each = rules.value.action_parameters.origin[*]
-            content {
-              host = origin.value.host
-              port = origin.value.port
-            }
-          }
-
-          # http_request_transform
-          dynamic "uri" {
-            for_each = rules.value.action_parameters.uri[*]
-            content {
-              dynamic "path" {
-                for_each = uri.value.path[*]
-                content {
-                  value = path.value
-                }
-              }
-
-              dynamic "query" {
-                for_each = uri.value.query[*]
-                content {
-                  value = query.value
-                }
-              }
-            }
-          }
-
-          # http_request_cache_settings
-          cache = action_parameters.value.cache
-          dynamic "edge_ttl" {
-            for_each = rules.value.action_parameters.edge_ttl[*]
-            content {
-              default = edge_ttl.value.default
-              mode    = edge_ttl.value.mode
-              dynamic "status_code_ttl" {
-                for_each = edge_ttl.value.status_code_ttl[*]
-                content {
-                  value       = status_code_ttl.value.value
-                  status_code = status_code_ttl.value.status_code
-                  dynamic "status_code_range" {
-                    for_each = status_code_ttl.value.status_code_range[*]
-                    content {
-                      from = status_code_range.value.from
-                      to   = status_code_range.value.to
-                    }
-                  }
-                }
-              }
-            }
+          query = rule.action_parameters.uri.query == null ? null : {
+            expression = rule.action_parameters.uri.query.expression
+            value      = rule.action_parameters.uri.query.value
           }
         }
       }
+      description = rule.description
+      enabled     = rule.enabled
+      expression  = rule.expression
 
-      description = rules.value.description
-      enabled     = rules.value.enabled
-      expression  = rules.value.expression
-
-      dynamic "logging" {
-        for_each = rules.value.logging[*]
-        content {
-          enabled = logging.value.enabled
-        }
+      logging = rule.logging == null ? null : {
+        enabled = rule.logging.enabled
       }
 
       # http_ratelimit
-      dynamic "ratelimit" {
-        for_each = rules.value.ratelimit[*]
-        content {
-          characteristics            = ratelimit.value.characteristics
-          counting_expression        = ratelimit.value.counting_expression
-          mitigation_timeout         = ratelimit.value.mitigation_timeout
-          period                     = ratelimit.value.period
-          requests_per_period        = ratelimit.value.requests_per_period
-          requests_to_origin         = ratelimit.value.requests_to_origin
-          score_per_period           = ratelimit.value.score_per_period
-          score_response_header_name = ratelimit.value.score_response_header_name
-        }
+      ratelimit = rule.ratelimit == null ? null : {
+        characteristics            = rule.ratelimit.characteristics
+        counting_expression        = rule.ratelimit.counting_expression
+        mitigation_timeout         = rule.ratelimit.mitigation_timeout
+        period                     = rule.ratelimit.period
+        requests_per_period        = rule.ratelimit.requests_per_period
+        requests_to_origin         = rule.ratelimit.requests_to_origin
+        score_per_period           = rule.ratelimit.score_per_period
+        score_response_header_name = rule.ratelimit.score_response_header_name
       }
 
-      ref = coalesce(rules.value.ref, md5("${rules.value.description}-${rules.value.expression}"))
+      ref = coalesce(rule.ref, random_uuid.rule_ref[rule.description].result)
     }
-  }
+  ]
+}
+
+resource "random_uuid" "rule_ref" {
+  for_each = toset([for r in var.rules : r.description])
 }

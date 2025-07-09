@@ -1,6 +1,6 @@
 output "domain" {
   description = "Current zone information."
-  value       = data.cloudflare_zones.domain.zones
+  value       = data.cloudflare_zones.domain.result
 }
 
 output "rules" {
