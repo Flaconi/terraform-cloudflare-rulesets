@@ -1,6 +1,6 @@
-output "domain" {
+output "zone" {
   description = "Current zone information."
-  value       = data.cloudflare_zones.domain.result
+  value       = { for k, v in data.cloudflare_zones.domain.result[0] : k => v if k != "development_mode" }
 }
 
 output "rules" {
