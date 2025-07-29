@@ -204,8 +204,8 @@ Default: `[]`
 
 | Name | Description |
 |------|-------------|
-| <a name="output_domain"></a> [domain](#output\_domain) | Current zone information. |
 | <a name="output_rules"></a> [rules](#output\_rules) | Created Cloudflare rules for the current zone. |
+| <a name="output_zone"></a> [zone](#output\_zone) | Current zone information. |
 
 <!-- TFDOCS_OUTPUTS_END -->
 
