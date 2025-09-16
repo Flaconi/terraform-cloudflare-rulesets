@@ -1,5 +1,5 @@
 resource "cloudflare_ruleset" "this" {
-  zone_id     = lookup(data.cloudflare_zones.domain.result[0], "id")
+  zone_id     = lookup(data.cloudflare_zones.this.result[0], "id")
   name        = var.name
   kind        = var.kind
   phase       = var.phase
