@@ -1,10 +1,13 @@
-module "rulesets" {
-  source    = "./../../"
+provider "cloudflare" {
   api_token = var.api_token
-  domain    = var.domain
-  name      = "default"
-  kind      = "zone"
-  phase     = "http_request_firewall_custom"
+}
+
+module "rulesets" {
+  source = "./../../"
+  domain = var.domain
+  name   = "default"
+  kind   = "zone"
+  phase  = "http_request_firewall_custom"
   rules = [
     {
       description = "User-Agent: skip"

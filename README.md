@@ -18,7 +18,7 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | 5.6.0 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.10 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
 
 <!-- TFDOCS_PROVIDER_END -->
@@ -29,7 +29,7 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | 5.6.0 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.10 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | 3.7.2 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
@@ -38,12 +38,6 @@ This Terraform module manages Cloudflare Rulesets.
 ## Required Inputs
 
 The following input variables are required:
-
-### <a name="input_api_token"></a> [api\_token](#input\_api\_token)
-
-Description: The Cloudflare API token.
-
-Type: `string`
 
 ### <a name="input_domain"></a> [domain](#input\_domain)
 
@@ -213,4 +207,4 @@ Default: `[]`
 
 **[MIT License](LICENSE)**
 
-Copyright (c) 2024 **[Flaconi GmbH](https://github.com/flaconi)**
+Copyright (c) 2024-2025 **[Flaconi GmbH](https://github.com/flaconi)**
