@@ -106,7 +106,7 @@ list(object({
       # phase: http_request_cache_settings
       cache = optional(bool)
       edge_ttl = optional(object({
-        default = number
+        default = optional(number)
         mode    = string
         status_code_ttl = optional(list(object({
           value       = number

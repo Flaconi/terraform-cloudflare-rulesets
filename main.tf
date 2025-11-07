@@ -26,7 +26,7 @@ resource "cloudflare_ruleset" "this" {
             for sct in rule.action_parameters.edge_ttl.status_code_ttl : {
               value       = sct.value
               status_code = sct.status_code
-              status_code_range = sct.status_code_ttl == null ? null : {
+              status_code_range = sct.status_code_range == null ? null : {
                 from = sct.status_code_range.from
                 to   = sct.status_code_range.to
               }
