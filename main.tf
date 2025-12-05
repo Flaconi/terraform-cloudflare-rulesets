@@ -19,6 +19,10 @@ resource "cloudflare_ruleset" "this" {
 
         # http_request_cache_settings
         cache = rule.action_parameters.cache
+        browser_ttl = rule.action_parameters.browser_ttl == null ? null : {
+          default = rule.action_parameters.browser_ttl.default
+          mode    = rule.action_parameters.browser_ttl.mode
+        }
         edge_ttl = rule.action_parameters.edge_ttl == null ? null : {
           default = rule.action_parameters.edge_ttl.default
           mode    = rule.action_parameters.edge_ttl.mode

@@ -105,6 +105,10 @@ list(object({
 
       # phase: http_request_cache_settings
       cache = optional(bool)
+      browser_ttl = optional(object({
+        default = optional(number)
+        mode    = string
+      }), null)
       edge_ttl = optional(object({
         default = optional(number)
         mode    = string
