@@ -67,6 +67,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_ref_prefix"></a> [ref\_prefix](#input\_ref\_prefix)
+
+Description: Prefix to add to the rule references.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_description"></a> [description](#input\_description)
 
 Description: Brief summary of the ruleset and its intended use.

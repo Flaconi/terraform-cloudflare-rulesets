@@ -114,7 +114,7 @@ resource "cloudflare_ruleset" "this" {
         score_response_header_name = rule.ratelimit.score_response_header_name
       }
 
-      ref = coalesce(rule.ref, random_uuid.rule_ref[rule.description].result)
+      ref = join("", compact([var.ref_prefix, coalesce(rule.ref, random_uuid.rule_ref[rule.description].result)]))
     }
   ]
 }

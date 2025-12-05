@@ -8,6 +8,12 @@ variable "name" {
   type        = string
 }
 
+variable "ref_prefix" {
+  description = "Prefix to add to the rule references."
+  type        = string
+  default     = null
+}
+
 variable "kind" {
   description = "Type of Ruleset to create."
   type        = string
