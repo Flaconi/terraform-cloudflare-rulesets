@@ -39,12 +39,6 @@ This Terraform module manages Cloudflare Rulesets.
 
 The following input variables are required:
 
-### <a name="input_domain"></a> [domain](#input\_domain)
-
-Description: Cloudflare domain to apply rules for.
-
-Type: `string`
-
 ### <a name="input_name"></a> [name](#input\_name)
 
 Description: Name of the ruleset.
@@ -67,9 +61,25 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_domain"></a> [domain](#input\_domain)
+
+Description: Cloudflare domain to apply rules for. Required for zone-level rulesets.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_ref_prefix"></a> [ref\_prefix](#input\_ref\_prefix)
 
 Description: Prefix to add to the rule references.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_account_id"></a> [account\_id](#input\_account\_id)
+
+Description: Cloudflare account ID. Required for account-level rulesets.
 
 Type: `string`
 
@@ -211,7 +221,7 @@ Default: `[]`
 | Name | Description |
 |------|-------------|
 | <a name="output_rules"></a> [rules](#output\_rules) | Created Cloudflare rules for the current zone. |
-| <a name="output_zone"></a> [zone](#output\_zone) | Current zone information. |
+| <a name="output_zone"></a> [zone](#output\_zone) | Current zone information. Only available for zone-level rulesets. |
 
 <!-- TFDOCS_OUTPUTS_END -->
 
