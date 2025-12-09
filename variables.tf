@@ -1,6 +1,7 @@
 variable "domain" {
-  description = "Cloudflare domain to apply rules for."
+  description = "Cloudflare domain to apply rules for. Required for zone-level rulesets."
   type        = string
+  default     = null
 }
 
 variable "name" {
@@ -14,6 +15,12 @@ variable "ref_prefix" {
   default     = null
 }
 
+variable "account_id" {
+  description = "Cloudflare account ID. Required for account-level rulesets."
+  type        = string
+  default     = null
+}
+
 variable "kind" {
   description = "Type of Ruleset to create."
   type        = string
@@ -21,8 +28,8 @@ variable "kind" {
   # Ensure we specify only the supported kind values
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#kind
   validation {
-    condition     = can(contains(["zone"], var.kind))
-    error_message = "Only the following kind types are allowed: zone."
+    condition     = can(contains(["zone", "account"], var.kind))
+    error_message = "Only the following kind types are allowed: zone, account."
   }
 }
 

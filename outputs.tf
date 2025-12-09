@@ -1,6 +1,6 @@
 output "zone" {
-  description = "Current zone information."
-  value       = { for k, v in data.cloudflare_zones.this.result[0] : k => v if k != "development_mode" }
+  description = "Current zone information. Only available for zone-level rulesets."
+  value       = var.kind == "zone" ? { for k, v in data.cloudflare_zones.this[0].result[0] : k => v if k != "development_mode" } : null
 }
 
 output "rules" {
