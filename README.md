@@ -208,10 +208,7 @@ Default: `[]`
 <!-- TFDOCS_OUTPUTS_START -->
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_rules"></a> [rules](#output\_rules) | Created Cloudflare rules for the current zone. |
-| <a name="output_zone"></a> [zone](#output\_zone) | Current zone information. |
+No outputs.
 
 <!-- TFDOCS_OUTPUTS_END -->
 

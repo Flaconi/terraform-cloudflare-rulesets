@@ -34,9 +34,7 @@ No resources.
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_records"></a> [records](#output\_records) | Cloudflare Zone DNS Records |
+No outputs.
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
