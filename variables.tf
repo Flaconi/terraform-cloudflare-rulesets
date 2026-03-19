@@ -199,8 +199,8 @@ variable "rules" {
 
   # Ensure we specify only allowed action_parameters.polish
   validation {
-    condition     = alltrue([for rule in var.rules : try(contains(["off", "lossless", "lossy"], rule.action_parameters.polish), true)])
-    error_message = "Only the following polish elements are allowed off, lossless, lossy"
+    condition     = alltrue([for rule in var.rules : try(contains(["off", "lossless", "lossy", "webp"], rule.action_parameters.polish), true)])
+    error_message = "Only the following polish elements are allowed off, lossless, lossy, webp"
   }
 
   # Ensure that either query or path are set for rewrite rules
