@@ -18,8 +18,8 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.10 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.18 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.8.1 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -29,8 +29,8 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.10 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | 3.7.2 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.18 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | 3.8.1 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -66,6 +66,14 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_ref_prefix"></a> [ref\_prefix](#input\_ref\_prefix)
+
+Description: Prefix to add to the rule references.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_description"></a> [description](#input\_description)
 
@@ -105,6 +113,10 @@ list(object({
 
       # phase: http_request_cache_settings
       cache = optional(bool)
+      browser_ttl = optional(object({
+        default = optional(number)
+        mode    = string
+      }), null)
       edge_ttl = optional(object({
         default = optional(number)
         mode    = string
@@ -196,10 +208,7 @@ Default: `[]`
 <!-- TFDOCS_OUTPUTS_START -->
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_rules"></a> [rules](#output\_rules) | Created Cloudflare rules for the current zone. |
-| <a name="output_zone"></a> [zone](#output\_zone) | Current zone information. |
+No outputs.
 
 <!-- TFDOCS_OUTPUTS_END -->
 

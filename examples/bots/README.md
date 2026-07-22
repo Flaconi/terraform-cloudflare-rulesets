@@ -8,8 +8,8 @@ This example will create multiple rulesets for `http_request_firewall_custom` ph
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.10 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | 3.7.2 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.18 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | 3.8.1 |
 
 ## Providers
 
@@ -34,9 +34,7 @@ No resources.
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_records"></a> [records](#output\_records) | Cloudflare Zone DNS Records |
+No outputs.
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 

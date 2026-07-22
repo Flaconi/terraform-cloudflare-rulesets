@@ -3,11 +3,12 @@ provider "cloudflare" {
 }
 
 module "rulesets" {
-  source = "./../../"
-  domain = var.domain
-  name   = "default"
-  kind   = "zone"
-  phase  = "http_request_firewall_custom"
+  source     = "./../../"
+  domain     = var.domain
+  name       = "default"
+  kind       = "zone"
+  phase      = "http_request_firewall_custom"
+  ref_prefix = "flaconi-"
   rules = [
     {
       description = "User-Agent: skip"
@@ -17,6 +18,7 @@ module "rulesets" {
       (http.user_agent contains "Bot/" and http.request.uri.path eq "/api/v1")
       EOT
       products    = ["waf"]
+      ref         = "custom-rule-001"
     },
     {
       description = "User-Agent: log"
