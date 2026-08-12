@@ -93,6 +93,15 @@ resource "cloudflare_ruleset" "this" {
             value      = rule.action_parameters.uri.query.value
           }
         }
+
+        # http_request_late_transform
+        headers = rule.action_parameters.headers == null ? null : {
+          for name, header in rule.action_parameters.headers : name => {
+            operation  = header.operation
+            value      = header.value
+            expression = header.expression
+          }
+        }
       }
       description = rule.description
       enabled     = rule.enabled
