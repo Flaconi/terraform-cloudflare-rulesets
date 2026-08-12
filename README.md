@@ -18,8 +18,8 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.18 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.8.1 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.23 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -29,8 +29,8 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.18 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | 3.8.1 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.23 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | 3.9.0 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -181,6 +181,13 @@ list(object({
           value      = string
         }), null)
       }), null)
+
+      # phase: http_request_late_transform, action: rewrite
+      headers = optional(map(object({
+        operation  = string
+        value      = optional(string)
+        expression = optional(string)
+      })), null)
     }), null)
 
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
