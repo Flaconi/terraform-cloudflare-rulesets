@@ -34,8 +34,8 @@ variable "phase" {
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
   # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = contains(["http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_cache_settings"], var.phase)
-    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_cache_settings."
+    condition     = contains(["http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_late_transform", "http_request_cache_settings"], var.phase)
+    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_late_transform, http_request_cache_settings."
   }
 }
 
@@ -138,6 +138,13 @@ variable "rules" {
           value      = string
         }), null)
       }), null)
+
+      # phase: http_request_late_transform, action: rewrite
+      headers = optional(map(object({
+        operation  = string
+        value      = optional(string)
+        expression = optional(string)
+      })), null)
     }), null)
 
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
@@ -203,10 +210,16 @@ variable "rules" {
     error_message = "Only the following polish elements are allowed off, lossless, lossy, webp"
   }
 
-  # Ensure that either query or path are set for rewrite rules
+  # Ensure that either query, path or headers are set for rewrite rules
   validation {
-    condition     = alltrue([for rule in var.rules : rule.action == "rewrite" ? (can(rule.action_parameters.uri.path) || can(rule.action_parameters.uri.query)) : true])
-    error_message = "action_parameters.uri needs to have either path or query value for rewrite"
+    condition     = alltrue([for rule in var.rules : rule.action == "rewrite" ? (can(rule.action_parameters.uri.path) || can(rule.action_parameters.uri.query) || can(rule.action_parameters.headers)) : true])
+    error_message = "action_parameters needs to have either uri.path, uri.query or headers for rewrite"
+  }
+
+  # Ensure we specify only allowed action_parameters.headers.*.operation values
+  validation {
+    condition     = alltrue([for rule in var.rules : try(alltrue([for h in rule.action_parameters.headers : contains(["add", "set", "remove"], h.operation)]), true)])
+    error_message = "Only the following headers operation elements are allowed: add, set, remove."
   }
 
   # Ensure that either expression or value are set for redirect rules as target_url
