@@ -59,18 +59,21 @@ resource "cloudflare_ruleset" "this" {
           action = rule.action_parameters.overrides.action
           categories = rule.action_parameters.overrides.categories == null ? null : [
             for cat in rule.action_parameters.overrides.categories : {
-              action   = cat.action
-              category = cat.category
-              enabled  = cat.enabled
+              action            = cat.action
+              category          = cat.category
+              enabled           = cat.enabled
+              sensitivity_level = cat.sensitivity_level
             }
           ]
-          enabled = rule.action_parameters.overrides.enabled
+          enabled           = rule.action_parameters.overrides.enabled
+          sensitivity_level = rule.action_parameters.overrides.sensitivity_level
           rules = rule.action_parameters.overrides.rules == null ? null : [
             for o_rule in rule.action_parameters.overrides.rules : {
-              id              = o_rule.id
-              action          = o_rule.action
-              enabled         = o_rule.enabled
-              score_threshold = o_rule.score_threshold
+              id                = o_rule.id
+              action            = o_rule.action
+              enabled           = o_rule.enabled
+              score_threshold   = o_rule.score_threshold
+              sensitivity_level = o_rule.sensitivity_level
             }
           ]
         }
