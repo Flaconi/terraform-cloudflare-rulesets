@@ -146,20 +146,24 @@ list(object({
       ruleset  = optional(string)
 
       # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
+      # phase: ddos_l7, action: execute (sensitivity_level is only applicable for DDoS phases)
       id = optional(string)
       overrides = optional(object({
         action = optional(string)
         categories = optional(list(object({
-          action   = optional(string)
-          category = string
-          enabled  = bool
+          action            = optional(string)
+          category          = string
+          enabled           = optional(bool)
+          sensitivity_level = optional(string)
         })), null)
-        enabled = optional(bool)
+        enabled           = optional(bool)
+        sensitivity_level = optional(string)
         rules = optional(list(object({
-          id              = string
-          action          = string
-          enabled         = bool
-          score_threshold = optional(number)
+          id                = string
+          action            = optional(string)
+          enabled           = optional(bool)
+          score_threshold   = optional(number)
+          sensitivity_level = optional(string)
         })), null)
       }), null)
 
