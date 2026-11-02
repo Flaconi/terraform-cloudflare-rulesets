@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-cloudflare-rulesets
+  description: >
+    This module will create Cloudflare Rulesets
+  annotations:
+    github.com/project-slug: Flaconi/terraform-cloudflare-rulesets
+  tags:
+    - terraform
+    - cloudflare
+    - rulesets
+
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform
+  providesApis: []

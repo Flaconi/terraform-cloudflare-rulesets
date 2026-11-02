@@ -8,8 +8,8 @@ This example will create multiple rulesets for `http_request_firewall_custom` ph
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.18 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | 3.8.1 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.23 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | 3.9.0 |
 
 ## Providers
 
