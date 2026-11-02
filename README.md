@@ -18,8 +18,8 @@ This Terraform module manages Cloudflare Rulesets.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.18 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.8.1 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 5.23 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -29,8 +29,8 @@ This Terraform module manages Cloudflare Rulesets.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
-| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.18 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | 3.8.1 |
+| <a name="requirement_cloudflare"></a> [cloudflare](#requirement\_cloudflare) | ~> 5.23 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | 3.9.0 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -146,20 +146,24 @@ list(object({
       ruleset  = optional(string)
 
       # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
+      # phase: ddos_l7, action: execute (sensitivity_level is only applicable for DDoS phases)
       id = optional(string)
       overrides = optional(object({
         action = optional(string)
         categories = optional(list(object({
-          action   = optional(string)
-          category = string
-          enabled  = bool
+          action            = optional(string)
+          category          = string
+          enabled           = optional(bool)
+          sensitivity_level = optional(string)
         })), null)
-        enabled = optional(bool)
+        enabled           = optional(bool)
+        sensitivity_level = optional(string)
         rules = optional(list(object({
-          id              = string
-          action          = string
-          enabled         = bool
-          score_threshold = optional(number)
+          id                = string
+          action            = optional(string)
+          enabled           = optional(bool)
+          score_threshold   = optional(number)
+          sensitivity_level = optional(string)
         })), null)
       }), null)
 
@@ -181,6 +185,13 @@ list(object({
           value      = string
         }), null)
       }), null)
+
+      # phase: http_request_late_transform, action: rewrite
+      headers = optional(map(object({
+        operation  = string
+        value      = optional(string)
+        expression = optional(string)
+      })), null)
     }), null)
 
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge

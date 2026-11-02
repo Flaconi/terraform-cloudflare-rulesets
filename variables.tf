@@ -34,8 +34,8 @@ variable "phase" {
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
   # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = contains(["http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_cache_settings"], var.phase)
-    error_message = "Only the following phase types are allowed: http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_cache_settings."
+    condition     = contains(["ddos_l7", "http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_late_transform", "http_request_cache_settings"], var.phase)
+    error_message = "Only the following phase types are allowed: ddos_l7, http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_late_transform, http_request_cache_settings."
   }
 }
 
@@ -103,20 +103,24 @@ variable "rules" {
       ruleset  = optional(string)
 
       # phase: http_request_firewall_managed, action: block, challenge, js_challenge, log, managed_challenge, skip
+      # phase: ddos_l7, action: execute (sensitivity_level is only applicable for DDoS phases)
       id = optional(string)
       overrides = optional(object({
         action = optional(string)
         categories = optional(list(object({
-          action   = optional(string)
-          category = string
-          enabled  = bool
+          action            = optional(string)
+          category          = string
+          enabled           = optional(bool)
+          sensitivity_level = optional(string)
         })), null)
-        enabled = optional(bool)
+        enabled           = optional(bool)
+        sensitivity_level = optional(string)
         rules = optional(list(object({
-          id              = string
-          action          = string
-          enabled         = bool
-          score_threshold = optional(number)
+          id                = string
+          action            = optional(string)
+          enabled           = optional(bool)
+          score_threshold   = optional(number)
+          sensitivity_level = optional(string)
         })), null)
       }), null)
 
@@ -138,6 +142,13 @@ variable "rules" {
           value      = string
         }), null)
       }), null)
+
+      # phase: http_request_late_transform, action: rewrite
+      headers = optional(map(object({
+        operation  = string
+        value      = optional(string)
+        expression = optional(string)
+      })), null)
     }), null)
 
     # phase: http_ratelimit, action: block, challenge, js_challenge, log, managed_challenge
@@ -203,10 +214,16 @@ variable "rules" {
     error_message = "Only the following polish elements are allowed off, lossless, lossy, webp"
   }
 
-  # Ensure that either query or path are set for rewrite rules
+  # Ensure that either query, path or headers are set for rewrite rules
   validation {
-    condition     = alltrue([for rule in var.rules : rule.action == "rewrite" ? (can(rule.action_parameters.uri.path) || can(rule.action_parameters.uri.query)) : true])
-    error_message = "action_parameters.uri needs to have either path or query value for rewrite"
+    condition     = alltrue([for rule in var.rules : rule.action == "rewrite" ? (can(rule.action_parameters.uri.path) || can(rule.action_parameters.uri.query) || can(rule.action_parameters.headers)) : true])
+    error_message = "action_parameters needs to have either uri.path, uri.query or headers for rewrite"
+  }
+
+  # Ensure we specify only allowed action_parameters.headers.*.operation values
+  validation {
+    condition     = alltrue([for rule in var.rules : try(alltrue([for h in rule.action_parameters.headers : contains(["add", "set", "remove"], h.operation)]), true)])
+    error_message = "Only the following headers operation elements are allowed: add, set, remove."
   }
 
   # Ensure that either expression or value are set for redirect rules as target_url
@@ -219,6 +236,18 @@ variable "rules" {
   validation {
     condition     = alltrue([for rule in var.rules : try(contains(["respect_origin", "bypass_by_default", "override_origin"], rule.action_parameters.edge_ttl.mode), true)])
     error_message = "Only the following edge_ttl.mode elements are allowed respect_origin, bypass_by_default, override_origin"
+  }
+
+  # Ensure we specify only allowed action_parameters.overrides sensitivity_level values (DDoS phases)
+  validation {
+    condition = alltrue(flatten([for rule in var.rules : [
+      for level in concat(
+        [try(rule.action_parameters.overrides.sensitivity_level, null)],
+        [for c in try(rule.action_parameters.overrides.categories, null) == null ? [] : rule.action_parameters.overrides.categories : c.sensitivity_level],
+        [for r in try(rule.action_parameters.overrides.rules, null) == null ? [] : rule.action_parameters.overrides.rules : r.sensitivity_level],
+      ) : level == null ? true : contains(["default", "medium", "low", "eoff"], level)
+    ]]))
+    error_message = "Only the following sensitivity_level elements are allowed: default, medium, low, eoff."
   }
 
   # Ensure we specify unique rule description. The description is uses as reference if it is not defined explicitly.
