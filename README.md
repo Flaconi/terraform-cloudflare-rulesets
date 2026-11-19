@@ -186,7 +186,7 @@ list(object({
         }), null)
       }), null)
 
-      # phase: http_request_late_transform, action: rewrite
+      # phase: http_request_late_transform, http_response_headers_transform, action: rewrite
       headers = optional(map(object({
         operation  = string
         value      = optional(string)
