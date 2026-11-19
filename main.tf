@@ -97,7 +97,7 @@ resource "cloudflare_ruleset" "this" {
           }
         }
 
-        # http_request_late_transform
+        # http_request_late_transform, http_response_headers_transform
         headers = rule.action_parameters.headers == null ? null : {
           for name, header in rule.action_parameters.headers : name => {
             operation  = header.operation

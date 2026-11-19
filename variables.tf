@@ -34,8 +34,8 @@ variable "phase" {
   # https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/ruleset#phase
   # https://developers.cloudflare.com/ruleset-engine/reference/phases-list/
   validation {
-    condition     = contains(["ddos_l7", "http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_late_transform", "http_request_cache_settings"], var.phase)
-    error_message = "Only the following phase types are allowed: ddos_l7, http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_late_transform, http_request_cache_settings."
+    condition     = contains(["ddos_l7", "http_config_settings", "http_log_custom_fields", "http_ratelimit", "http_request_dynamic_redirect", "http_request_firewall_custom", "http_request_firewall_managed", "http_request_origin", "http_request_transform", "http_request_late_transform", "http_request_cache_settings", "http_response_headers_transform"], var.phase)
+    error_message = "Only the following phase types are allowed: ddos_l7, http_config_settings, http_log_custom_fields, http_ratelimit, http_request_dynamic_redirect, http_request_firewall_custom, http_request_firewall_managed, http_request_origin, http_request_transform, http_request_late_transform, http_request_cache_settings, http_response_headers_transform."
   }
 }
 
@@ -143,7 +143,7 @@ variable "rules" {
         }), null)
       }), null)
 
-      # phase: http_request_late_transform, action: rewrite
+      # phase: http_request_late_transform, http_response_headers_transform, action: rewrite
       headers = optional(map(object({
         operation  = string
         value      = optional(string)
